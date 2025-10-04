@@ -1,59 +1,40 @@
 using UnityEngine;
-using System.Collections;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(CharacterController))]
 public class EnemyAI : MonoBehaviour
 {
     public Transform player;
-    public float moveSpeed = 2.5f;
-    public float stopDistance = 10f;
-    public float fireRate = 1.8f;
-    public Transform firePoint;
-    public GameObject bulletPrefab;
-    public float shootingRange = 20f;
-    public Animator animator;
-
-    CharacterController controller;
-    float nextFireTime = 0f;
-
-    void Start()
-    {
-        controller = GetComponent<CharacterController>();
-    }
+    public float speed = 3f;
+    public float stopDistance = 2f;       // فاصله‌ای که دشمن متوقف می‌شود
+    public float retreatDistance = 1f;    // فاصله‌ای که دشمن عقب می‌رود
+    public float attackRate = 1f;         // زمان بین حمله‌ها
+    private float nextAttackTime = 0f;
 
     void Update()
     {
-        if (player == null) return;
+        float distance = Vector2.Distance(transform.position, player.position);
 
-        Vector3 dir = player.position - transform.position;
-        float dist = dir.magnitude;
-        dir.y = 0;
-
-        if (dist > stopDistance)
+        if (distance > stopDistance)
         {
-            Vector3 move = dir.normalized * moveSpeed;
-            controller.Move(move * Time.deltaTime);
-            if (animator) animator.SetFloat("Speed", 1f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 5f);
+            // نزدیک شدن به بازیکن
+            transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
         }
-        else
+        else if (distance < retreatDistance)
         {
-            if (animator) animator.SetFloat("Speed", 0f);
+            // عقب رفتن از بازیکن
+            Vector2 dir = transform.position - player.position;
+            transform.position = Vector2.MoveTowards(transform.position, (Vector2)transform.position + dir, speed * Time.deltaTime);
         }
 
-        if (dist <= shootingRange && Time.time >= nextFireTime)
+        // حمله اگر زمان حمله رسیده
+        if (Time.time >= nextAttackTime && distance <= stopDistance)
         {
-            Shoot();
-            nextFireTime = Time.time + fireRate;
+            AttackPlayer();
+            nextAttackTime = Time.time + attackRate;
         }
     }
 
-    void Shoot()
+    void AttackPlayer()
     {
-        if (bulletPrefab == null || firePoint == null) return;
-        GameObject b = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Rigidbody rb = b.GetComponent<Rigidbody>();
-        if (rb) rb.velocity = (player.position - firePoint.position).normalized * 20f;
-        if (animator) animator.SetTrigger("Shoot");
-    }
-}
+        // کد حمله به بازیکن (می‌تونه کاهش سلامتی یا شلیک گلوله باشد)
+        Debug.L
