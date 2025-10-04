@@ -3,21 +3,16 @@ using UnityEngine.UI;
 
 public class HUDController : MonoBehaviour
 {
-    public Slider healthBar;
-    public Text ammoText;
-    public PlayerShooting player;
-    public Health playerHealth;
+    public Slider healthBar;          // نوار سلامتی
+    public Text ammoText;             // نمایش مهمات
+    public PlayerShooting playerShooting;
 
     void Update()
     {
-        if (playerHealth != null)
-        {
-            healthBar.value = playerHealth.currentHealth / playerHealth.maxHealth;
-        }
+        // به‌روزرسانی نوار سلامتی
+        healthBar.value = playerShooting.GetComponent<Health>().currentHealth;
 
-        if (player != null)
-        {
-            ammoText.text = "Ammo: " + player.currentAmmo + "/" + player.maxAmmo;
-        }
+        // نمایش مهمات
+        ammoText.text = "Ammo: " + playerShooting.ammo;
     }
 }
