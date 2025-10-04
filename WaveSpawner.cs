@@ -1,42 +1,29 @@
 using UnityEngine;
-using System.Collections;
 
 public class WaveSpawner : MonoBehaviour
 {
-    public GameObject enemyPrefab;
     public Transform[] spawnPoints;
+    public GameObject enemyPrefab;
     public int enemiesPerWave = 3;
     public float timeBetweenWaves = 5f;
+    private int waveNumber = 0;
 
-    private int waveIndex = 0;
-    private bool spawning = false;
-
-    void Update()
+    void Start()
     {
-        if (!spawning && GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
-        {
-            StartCoroutine(SpawnWave());
-        }
+        InvokeRepeating("SpawnWave", 2f, timeBetweenWaves);
     }
 
-    IEnumerator SpawnWave()
+    void SpawnWave()
     {
-        spawning = true;
-        waveIndex++;
+        waveNumber++;
+        int enemyCount = enemiesPerWave + waveNumber; // افزایش سختی با هر موج
 
-        for (int i = 0; i < enemiesPerWave + waveIndex; i++)
+        for (int i = 0; i < enemyCount; i++)
         {
-            SpawnEnemy();
-            yield return new WaitForSeconds(1f);
+            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
         }
 
-        spawning = false;
-    }
-
-    void SpawnEnemy()
-    {
-        if (spawnPoints.Length == 0) return;
-        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        Instantiate(enemyPrefab, sp.position, sp.rotation);
+        Debug.Log("Wave " + waveNumber + " spawned with " + enemyCount + " enemies.");
     }
 }
